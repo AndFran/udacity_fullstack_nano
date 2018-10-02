@@ -14,22 +14,34 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from functools import wraps
 
-CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secret.json', 'r')
+                       .read())['web']['client_id']
 
 engine = create_engine("sqlite:///cat2.db")
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
-session = scoped_session(sessionmaker(bind=engine))  # does not work because of threading
+
+# does not work because of threading
+session = scoped_session(sessionmaker(bind=engine))
 
 app = Flask(__name__)
 
 
 def generate_random_string():
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))  # 32 char random sequence
+    """
+    Generates a random string of 32 characters from letters and numbers
+    """
+    return ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(32))
 
 
 def requires_login(func):
+    """
+    Wrapper function that checks the user is logged in before letting
+    them access write, delete and update functions
+    """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         if 'email' not in login_session:
@@ -40,6 +52,9 @@ def requires_login(func):
 
 
 def generate_csrf_token():
+    """
+    Adds the random token to the user's session for CSRF protection
+    """
     if '_csrf_token' not in login_session:
         login_session['_csrf_token'] = generate_random_string()
     return login_session['_csrf_token']
@@ -61,6 +76,10 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 @app.route('/login', methods=['GET', 'POST'])
 def showLogin():
+    """
+    This will show the login screen, it allow both oauth2 login with gplus and
+    simple user name and password logins
+    """
     state = generate_random_string()
     login_session['state'] = state
 
@@ -80,6 +99,9 @@ def showLogin():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+    This is the oauth2 flow for google plus login
+    """
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -95,7 +117,8 @@ def gconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     access_token = credentials.access_token
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
+           % access_token)
     h = httplib2.Http()
     result = json.loads(h.request(url, 'GET')[1])
     if result.get('error') is not None:
@@ -127,7 +150,9 @@ def gconnect():
     if data.get('username') is None:
         login_session['username'] = data['email']
 
-    current_user = session.query(User).filter_by(email=login_session['email']).first()
+    current_user = session.query(User).filter_by(
+        email=login_session['email']).first()
+
     if not current_user:
         # we create a new user if one does not exist
         create_user(login_session['username'])
@@ -137,14 +162,16 @@ def gconnect():
 @app.route('/disconnect')
 def disconnect():
     """
-    Disconnects/logs out the user whether they have logged in with a password or OAUTH
+    Disconnects/logs out the user whether they
+    have logged in with a password or OAUTH
     """
     access_token = login_session.get('access_token')
     if access_token:
         # try to revoke the token if any
         requests.post('https://accounts.google.com/o/oauth2/revoke',
                       params={'token': login_session['access_token']},
-                      headers={'content-type': 'application/x-www-form-urlencoded'})
+                      headers={'content-type':
+                               'application/x-www-form-urlencoded'})
 
     if login_session.get('access_token'):
         del login_session['access_token']
@@ -227,7 +254,9 @@ def show_category_details(category_name):
     """
     category = session.query(Category).filter_by(name=category_name).one()
     items = session.query(Item).filter_by(category_id=category.id).all()
-    return render_template('categoryDetails.html', category=category, items=items)
+    return render_template('categoryDetails.html',
+                           category=category,
+                           items=items)
 
 
 @app.route("/catalog/category/new", methods=["GET", "POST"])
@@ -244,7 +273,10 @@ def add_new_category():
         if not category_name:
             flash("Invalid Category name")
             return render_template('createCategory.html')
-        category = session.query(Category).filter_by(name=category_name).first()
+        category = session.query(Category)\
+            .filter_by(name=category_name)\
+            .first()
+
         if category:
             flash("Category already exists, the names must be unique")
             return render_template('createCategory.html')
@@ -263,7 +295,9 @@ def show_item_details(item_id):
     """
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
-    return render_template('itemDetails.html', item=item, categories=categories)
+    return render_template('itemDetails.html',
+                           item=item,
+                           categories=categories)
 
 
 @app.route("/catalog/<category_name>/add", methods=['POST'])
@@ -278,13 +312,19 @@ def add_new_item(category_name):
     item_description = request.form.get('itemDescription')
     if not item_name or not item_description:
         flash("Please fill in all fields")
-        return redirect(url_for('show_category_details'), category_name=category_name)
+        return redirect(url_for('show_category_details'),
+                        category_name=category_name)
 
-    new_item = Item(name=item_name, description=item_description, category=category, user=user)
+    new_item = Item(name=item_name,
+                    description=item_description,
+                    category=category,
+                    user=user)
+
     session.add(new_item)
     session.commit()
     flash("New item {} added".format(new_item.name))
-    return redirect(url_for('show_category_details', category_name=category_name))
+    return redirect(url_for('show_category_details',
+                            category_name=category_name))
 
 
 @app.route("/catalog/<category_name>/<item_id>/confirm")
@@ -294,6 +334,10 @@ def confirm_delete_item(category_name, item_id):
     Displays the confirmation for deleting an item
     """
     item = session.query(Item).filter_by(id=item_id).one()
+
+    if item.user_id != get_user(login_session['email'].id):
+        flash("You cannot delete other users' items")
+        return redirect(url_for('show_item_details', item_id=item_id))
     return render_template('itemDeleteConfirm.html', item=item)
 
 
@@ -303,11 +347,18 @@ def delete_item(category_name, item_id):
     """
     Performs the actual item delete
     """
+    user = get_user(login_session['email'])
     item = session.query(Item).filter_by(id=item_id).one()
+    if item.user_id != user.id:
+        flash("You cannot delete other users' items")
+        return redirect(url_for('show_category_details',
+                                category_name=category_name))
+
     session.delete(item)
     session.commit()
     flash("Item {} deleted".format(item.name))
-    return redirect(url_for('show_category_details', category_name=category_name))
+    return redirect(url_for('show_category_details',
+                            category_name=category_name))
 
 
 @app.route("/catalog/<item_id>/update", methods=['POST'])
@@ -326,6 +377,11 @@ def update_item(item_id):
 
     category = session.query(Category).filter_by(id=item_category).one()
     item = session.query(Item).filter_by(id=item_id).one()
+
+    if item.user_id != get_user(session['email']):
+        flash("You cannot update other users' items")
+        return redirect(url_for('show_item_details', item_id=item_id))
+
     item.name = item_name
     item.description = item_description
     item.category = category
@@ -334,7 +390,8 @@ def update_item(item_id):
     flash("Item {} updated".format(item_name))
 
     # note the item could now be in a new category
-    return redirect(url_for('show_category_details', category_name=category.name))
+    return redirect(url_for('show_category_details',
+                            category_name=category.name))
 
 
 # API end points
@@ -400,14 +457,15 @@ def verify_user(email, password):
 
 def create_user(email, password=None):
     """
-    All users whether they login with OAUTH or a username and password are stored in our DB
-    So users entering by Oauth will not have a password, so we create a random one for them
-    They can manage their account in "My Account" page if they want supply a password
+    All users whether they login with OAUTH or a username
+    and password are stored in our DB So users entering by
+    Oauth will not have a password, so we create a random one
+    for them They can manage their account in "My Account" page
+    if they want supply a password.
     """
     new_user = User(email=email)
 
     if password is None:
-        # generate a secret random password for the user who logs in with oauth so we have them in the DB
         password = str(uuid.uuid4().hex)
     new_user.hash_password(password)
     session.add(new_user)
