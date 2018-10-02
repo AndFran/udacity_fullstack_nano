@@ -1,1 +1,60 @@
+{% extends '_base.html' %}
 
+{% block content %}
+    <div class="container">
+        <div class="row">
+
+
+            {% if session['email'] %}
+                <h2>Welcome {{ session['email'] }}</h2>
+            {% endif %}
+            <!-- categories -->
+
+            <div class="col-sm-8" style="background-color: gainsboro">
+                <h3>Categories</h3>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">Category</th>
+                        <th scope="col">Created By</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for category in categories %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('show_category_details', category_name=category.name) }}">
+                                    <b>{{ category.name }}</b>
+                                </a>
+                            </td>
+                            <td>{{ category.user.email }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+
+            <!-- newest 10 items -->
+            <div class="col-sm-4" style="background-color: #cee5f5">
+                <h3>Items - newest 10</h3>
+                <ul>
+                    {% for item in items %}
+                        <li>
+                            <a href="{{ url_for('show_item_details', category_name=item.category.name, item_id=item.id) }}">{{ item.name }}
+                                in <b>{{ item.category.name }}</b></a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-sm-12">
+                {% if session['email'] %}
+                    <a class="btn btn-primary" href="{{ url_for('add_new_category') }}">Create new Category</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
