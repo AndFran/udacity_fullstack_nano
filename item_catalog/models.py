@@ -12,8 +12,6 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    #username = Column(String(32), unique=True, index=True, nullable=False)
-    #picture = Column(String, nullable=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String(32), nullable=False)
 
@@ -26,7 +24,6 @@ class User(Base):
     @property
     def serialize(self):
         return {"id": self.id,
-                #"username": self.username,
                 "picture": self.picture,
                 "email": self.email}
 
