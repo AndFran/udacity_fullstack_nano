@@ -1,1 +1,40 @@
+{% extends '_base.html' %}
+{% block content %}
+    <div class="container">
+        {% if session['email'] %}
+            <form method="POST" action="{{ url_for('update_item', item_id=item.id) }}">
+                <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <label for="itemName">Name</label>
+                    <input type="text" class="form-control" id="itemName" name="itemName"
+                           value="{{ item.name }}" required>
 
+                    <label for="itemDescription">Description</label>
+                    <input type="text" class="form-control" id="itemDescription" name="itemDescription"
+                           value="{{ item.description }}" required>
+
+                    <label for="itemCategory">In Category</label>
+                    <select class="form-control" id="itemCategory" name="itemCategory">
+                        {% for category in categories %}
+                            <option name="currentCategory" value="{{ category.id }}" {% if category.id==item.id %}
+                                    selected="selected"{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
+        {% else %}
+            <label for="itemName">Name</label>
+            <input type="text" class="form-control" id="itemNameLocked"
+                   value="{{ item.name }}" disabled>
+
+            <label for="itemDescriptionLocked">Description</label>
+            <input type="text" class="form-control" id="itemDescriptionLocked"
+                   value="{{ item.description }}" disabled>
+            <br>
+            <h5>Please login or sign up to make changes</h5>
+        {% endif %}
+    </div>
+
+{% endblock %}
