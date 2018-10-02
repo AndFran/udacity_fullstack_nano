@@ -1,6 +1,6 @@
 
 
-**Introduction:
+#**Introduction:**
 
 A CRUD application using pure flask (no extensions)
 Allows the authenticated user to create categories and add, delete and update items.
@@ -12,7 +12,7 @@ Users can manage their accounts in the "My Account" Menu.
 Each form that is posted is protected against CSRF attacks.
 
 
-**Setup Instructions:
+#**Setup Instructions:**
 
 The application will run as is after you install the dependencies:
 
