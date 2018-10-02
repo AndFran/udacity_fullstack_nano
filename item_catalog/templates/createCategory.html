@@ -1,1 +1,13 @@
+{% extends '_base.html' %}
+{% block content %}
+    <form method="POST">
+        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="categoryName">Category Name</label>
+            <input type="text" class="form-control" id="categoryName" name="categoryName" placeholder="New category..." required>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Category</button>
+    </form>
 
+
+{% endblock %}
