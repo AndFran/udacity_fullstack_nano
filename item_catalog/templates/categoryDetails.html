@@ -1,1 +1,65 @@
+{% extends '_base.html' %}
+{% block content %}
+    <div class="container">
 
+        <h3>{{ category.name }}</h3>
+        <span>Created by <b>{{ category.user.email }}</b></span><br>
+        <span>Created on <b>{{ category.created_date }}</b></span>
+        <br>
+        <br>
+        <br>
+
+        <div class="row">
+            <div class="col-sm-7" style="background-color: seashell">
+                {% if items %}
+                    <h5>Current Items in the category</h5>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Item name</th>
+                        </tr>
+                        </thead>
+                        <body>
+                        {% for item in items %}
+                            <tr>
+                                <td>
+                                    <span>{{ item.name }}</span>
+                                </td>
+                                <td>
+                                    {% if session['email'] %}
+                                    <a class="btn btn-warning"
+                                       href="{{ url_for('show_item_details', item_id=item.id) }}">Edit</a>
+
+                                    <a class="btn btn-danger"
+                                       href="{{ url_for('confirm_delete_item', category_name=category.name, item_id=item.id) }}">Delete</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </body>
+                    </table>
+                {% endif %}
+            </div>
+
+            {% if session['email'] %}
+                <div class="col-sm-5" style="background-color: #cee5f5">
+                    <h5>Create a new item</h5>
+                    <form method="POST" action="{{ url_for('add_new_item', category_name=category.name) }}">
+                        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+                        <div class="form-group">
+                            <label for="itemName">New Item Name</label>
+                            <input type="text" class="form-control" id="itemName" name="itemName"
+                                   placeholder="Name..." required>
+
+                            <label for="itemDescription">New Item Description</label>
+                            <input type="text" class="form-control" id="itemDescription" name="itemDescription"
+                                   placeholder="Description.." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create a new item</button>
+                    </form>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock %}
