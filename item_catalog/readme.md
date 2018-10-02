@@ -1,4 +1,5 @@
 
+
 Introduction:
 A CRUD application using pure flask (no extensions)
 Allows the authenticated user to create categories and add, delete and update items.
@@ -43,32 +44,11 @@ if __name__ == '__main__':
     app.secret_key = "TODO CHANGE THIS TO TOP SECRET KEY"
     app.run(host="localhost", port=5000, debug=True, threaded=False)
 
-app.secret_key should be set to a random secret key that is kept SECRET as it is used
-to sign session cookies.
+            **app.secret_key should be set to a random secret key that is kept SECRET as it is used
+                        to sign session cookies.  **
 
-Notice we explicitly set: host="localhost" and port=5000 this is because google OAUTH does 
+Notice we explicitly set: host="localhost" and port=5000 this is because google OAUTH does
 not currently allow IPs to be placed in the valid domains.
 
-Remove debug=True if deploying to a production environment so that no information about the 
+Remove debug=True if deploying to a production environment so that no information about the
 applications state is leaked.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
