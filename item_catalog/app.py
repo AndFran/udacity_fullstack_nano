@@ -14,7 +14,9 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from functools import wraps
 
-CLIENT_ID = json.loads(open('client_secret.json', 'r')
+CLIENT_SECRETS_FILE = 'client_secret.json'
+
+CLIENT_ID = json.loads(open(CLIENT_SECRETS_FILE, 'r')
                        .read())['web']['client_id']
 
 engine = create_engine("sqlite:///cat2.db")
@@ -108,7 +110,7 @@ def gconnect():
         return response
     code = request.data
     try:
-        oauth_flow = flow_from_clientsecrets('client_secret.json', scope='')
+        oauth_flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
@@ -335,7 +337,7 @@ def confirm_delete_item(category_name, item_id):
     """
     item = session.query(Item).filter_by(id=item_id).one()
 
-    if item.user_id != get_user(login_session['email'].id):
+    if not check_ownership_for_current_user(item.user_id):
         flash("You cannot delete other users' items")
         return redirect(url_for('show_item_details', item_id=item_id))
     return render_template('itemDeleteConfirm.html', item=item)
@@ -378,7 +380,7 @@ def update_item(item_id):
     category = session.query(Category).filter_by(id=item_category).one()
     item = session.query(Item).filter_by(id=item_id).one()
 
-    if item.user_id != get_user(session['email']):
+    if not check_ownership_for_current_user(item.user_id):
         flash("You cannot update other users' items")
         return redirect(url_for('show_item_details', item_id=item_id))
 
@@ -453,6 +455,16 @@ def verify_user(email, password):
     if not user.verify_password(password):
         return None
     return user
+
+
+@requires_login
+def check_ownership_for_current_user(incoming_user_id):
+    """
+    Helper to check that the supplied id belongs to the user
+    as identified by the session.
+    """
+    user = get_user(login_session['email'])
+    return user.id == int(incoming_user_id)
 
 
 def create_user(email, password=None):
