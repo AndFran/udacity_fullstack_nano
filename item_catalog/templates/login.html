@@ -1,7 +1,7 @@
 {% extends '_base.html' %}
 {% block content %}
     <form method="POST">
-        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+        <input id="_csrf_token" name="_csrf_token" type=hidden value="{{ csrf_token() }}">
         <div class="form-group">
             <label for="userEmail">Email address</label>
             <input type="email" class="form-control" id="userEmail" name="userEmail" placeholder="Enter Email">
@@ -39,10 +39,15 @@
     <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
     <script>
         function signInCallback(authResult) {
+            var token = $('#_csrf_token').val();
+
             if (authResult['code']) {
                 $('#signinButton').attr('style', 'display:none;');
                 $.ajax({
                     type: 'POST',
+                    beforeSend: function(request){
+                        request.setRequestHeader('_csrf_token', token);
+                    },
                     url: '/gconnect?state={{STATE}}',
                     processData: false,
                     contentType: 'application/octet-stream; charset=utf-8',
@@ -65,6 +70,5 @@
                 $('#result').html("Failed to make server side call, check you config and console.");
             }
         }
-
     </script>
 {% endblock %}
