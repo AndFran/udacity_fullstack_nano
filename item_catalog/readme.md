@@ -53,3 +53,44 @@ not currently allow IPs to be placed in the valid domains.
 
 Remove debug=True if deploying to a production environment so that no information about the
 applications state is leaked.
+
+#**Setting up the database**
+
+To run the application for the first time you should run the models.py script to build the database. 
+This will create a single sqlite database file called: cat2.db 
+
+This will be located in the project root directory. If you want to change the name or the location please
+refer to: 
+
+create_engine('sqlite:///cat2.db') in models.py
+and
+create_engine("sqlite:///cat2.db") in app.py
+
+#**AJAX requests**
+
+If extending the application with greater use of AJAX, all POST requests must have a field: 
+'_csrf_token' as part of the form. For ajax requests where we are not posting form data the field 'csrf_token'
+is checked in the request headers:
+
+if '_csrf_token' in request.headers:
+
+failure to include this header field will cause a 403 forbidden response locking you out of the application. This is only required for AJAX requests. All forms you might add should include the hidden field:
+
+<input id="_csrf_token" name="_csrf_token" type=hidden value="{{ csrf_token() }}">
+
+to protect against CSRF attacks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
