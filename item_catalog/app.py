@@ -69,7 +69,11 @@ def csrf_protect():
     """
     if request.method == "POST":
         token = login_session.pop('_csrf_token', None)
-        if not token or token != request.form.get('_csrf_token'):
+        if '_csrf_token' in request.headers:
+            request_token = request.headers['_csrf_token']
+        else:
+            request_token = request.form.get('_csrf_token')
+        if not token or token != request_token:
             abort(403)
 
 
