@@ -492,4 +492,4 @@ def create_user(email, password=None):
 
 if __name__ == '__main__':
     app.secret_key = "TODO CHANGE THIS TO TOP SECRET KEY"
-    app.run(host="localhost", port=5000, debug=True, threaded=False)
+    app.run(threaded=False)
