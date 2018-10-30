@@ -34,6 +34,8 @@ Go to SSH and Auth and browse to the above saved .ppk file.
 
 ![006](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/006_putty.jpg)
 
+## Connecting for the first time
+
 We can now connect, click open.
 When prompted for a user name enter: ubuntu
 
