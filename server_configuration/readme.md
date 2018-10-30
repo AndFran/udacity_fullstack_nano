@@ -227,39 +227,26 @@ The catalog application is now in the folder:
 ## Create the conf file for apache
 
 >sudo nano /etc/apache2/sites-available/catalog.conf
-<VirtualHost *:80>
 
-        ServerName http://ec2-3-121-94-16.eu-central-1.compute.amazonaws.com/
-        
-        ServerAdmin me
-        
-        WSGIScriptAlias / /var/www/catalog/catalog.wsgi
-        
-        <Directory /var/www/catalog/catalog/>
-        
-            Order allow,deny
-            
-            Allow from all
-            
-        </Directory>
-        
-        Alias /static /var/www/catalog/catalog/static
-        
-        <Directory /var/www/catalog/catalog/static/>
-        
-            Order allow,deny
-            
-            Allow from all
-            
-        </Directory>
-        
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        
-        LogLevel warn
-        
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
-        
+```
+<VirtualHost *:80>
+        ServerName http://ec2-3-121-94-16.eu-central-1.compute.amazonaws.com/       
+        ServerAdmin me        
+        WSGIScriptAlias / /var/www/catalog/catalog.wsgi        
+        <Directory /var/www/catalog/catalog/>        
+            Order allow,deny            
+            Allow from all            
+        </Directory>        
+        Alias /static /var/www/catalog/catalog/static        
+        <Directory /var/www/catalog/catalog/static/>        
+            Order allow,deny            
+            Allow from all            
+        </Directory>        
+        ErrorLog ${APACHE_LOG_DIR}/error.log        
+        LogLevel warn        
+        CustomLog ${APACHE_LOG_DIR}/access.log combined        
 </VirtualHost>
+```
 
 Notice the paths carefully.
 Enable the virtual host:
