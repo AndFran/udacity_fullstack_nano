@@ -66,9 +66,9 @@ sudo visudo
 Under the line that gives the root user sudo access, add the following:
 ```
 grader ALL=(ALL:ALL) ALL
-Configuring SSH to non-default port
 ```
 
+## Configuring SSH to non-default port
 ## Set up lightsail firewall
 
 Click the networking tab and add a new custom rule for the TCP protocol on 2200.
