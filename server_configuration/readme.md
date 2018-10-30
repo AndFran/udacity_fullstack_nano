@@ -3,6 +3,6 @@
 ## Set up an amazon lightsail instance
 
 
-(/images/001_lightsail_create.jpg)
+![Test](/images/001_lightsail_create.jpg)
 
 
