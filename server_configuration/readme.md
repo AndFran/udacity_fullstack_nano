@@ -45,6 +45,8 @@ Update the server:
 > sudo apt-get update
 > sudo apt-get upgrade
 
+## Create the grader user
+
 Setting up the grader user
 Create the grader user:
 > sudo adduser grader
@@ -53,18 +55,27 @@ sudo visudo
 
 ![008](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/008_ubunut.jpg)
 
+## Make the grader sudo
+
 Under the line that gives the root user sudo access, add the following:
 grader ALL=(ALL:ALL) ALL
 Configuring SSH to non-default port
+
+## Set up lightsail firewall
+
 Click the networking tab and add a new custom rule for the TCP protocol on 2200.
 
 ![009](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/009_firewall.jpg)
+
+## Create SSH keys for the grader
 
 Create the ssh keys for grader
 Creating the keys can be done in the putty key generator:
 Click generate:
 
-![010](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/010_putty_keys.jpg)
+
+
+## Install the grader's public key on the server
 
 When putty has finished generating the keys save them to a secure location on your hard disk on your local machine (both the private and public key).
 Now on the linux instance go to the grader’s home directory
@@ -73,13 +84,15 @@ Now on the linux instance go to the grader’s home directory
 >cd .ssh
 >sudo nano authorized_keys
 Paste this key into the file and save.
-Configure putty to use this key:
+
+## Configure putty to use this key:
 Just like we did with the default Ubuntu user above we set putty to use our private key:
 
-![011](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/011_ubuntu_ufw.jpg)
+![010](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/010_putty_keys.jpg)
 
 
-Test your connection, click open and you should connect as the grader.
+**Test your connection, click open and you should connect as the grader.**
+
 
 ## Securing Firewall and ports
 
@@ -113,14 +126,152 @@ Enable the firewall
 Check the status:
 >sudo ufw status
 
+![011](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/011_ubuntu_ufw.jpg)
+
+## Install apache
+
+Install apache
+> sudo apt-get install apache2
+
+Check the installation is correct by entering on your local computer the IP address of your server into the address bar of your browser you should get the default apache web page:
 
 ![012](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/012_apache_default.jpg)
 
+Installing the components to run WSGI python apps:
+now install the apache python components:
+
+> sudo apt-get install libapache2-mod-wsgi python-dev
+
+Make sure that WSGI is enabled with (it probably is by default):
+
+> sudo a2enmod wsgi
+
+## Installing dependencies
+
+Install GIT:
+
+> sudo apt-get install git
+
+
+Install PostGres SQL:
+
+> sudo apt-get install postgresql
+
+
+## Set up the default database:
+
+change to the postgres user:
+
+> sudo su - postgres
+
+Launch psql:
+
+> psql
+
+At the psql prompt we can now create the database and user
+postgres=# CREATE USER catalog_user WITH PASSWORD 'udacitycatalogapp';
+postgres=# ALTER USER catalog_user CREATEDB;
+postgres=# CREATE DATABASE catalog WITH OWNER catalog_user;
+
+Set the correct privileges:
+postgres=# REVOKE ALL ON SCHEMA public FROM public;
+postgres=# GRANT ALL ON SCHEMA public TO catalog_user;
+
+Quit postgres
+postgres=# \q
+> exit 
+We return to the user we logged in as (grader or Ubuntu).
+
+## Python dependencies:
+
+Install pip
+
+> sudo apt-get install python-pip
+
+- Install Flask
+> pip install flask
+
+- Install SqlAlchemy
+> pip install sqlalchemy
+
+- Install Oauth client
+> pip install oauth2client
+- Install httplib2
+> pip install httplib2
+- Install requests
+>pip install requests
+- Install psycopg2
+>pip install psycopg2
+
+
+We can now setup our flask application
+>cd /var/www
+> sudo mkdir catalog
+We will place the flask app in the catalog folder.
+>cd catalog
+Download the repository:
+sudo git clone https://github.com/AndFran/udacity_fullstack_nano.git
+Rename any directories etc.
+The catalog application is now in the folder:
+/var/www/catalog/catalog/
 
 
 ![013](https://github.com/AndFran/udacity_fullstack_nano/blob/master/server_configuration/images/013_apache_catalog_folder.jpg)
 
 
+## Create the conf file for apache
+
+>sudo nano /etc/apache2/sites-available/catalog.conf
+<VirtualHost *:80>
+        ServerName 54.93.245.121
+        ServerAdmin andrewwilliamfranks@gmail.com
+        WSGIScriptAlias / /var/www/catalog/catalog.wsgi
+        <Directory /var/www/catalog/catalog/>
+            Order allow,deny
+            Allow from all
+        </Directory>
+        Alias /static /var/www/catalog/catalog/static
+        <Directory /var/www/catalog/catalog/static/>
+            Order allow,deny
+            Allow from all
+        </Directory>
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        LogLevel warn
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+Notice the paths carefully.
+Enable the virtual host:
+>sudo a2ensite catalog
+Activate the new configuration:
+>sudo service apache2 reload
+
+## Create the WSGI file
+
+We now create the .wsgi file
+>cd /var/www/catalog
+>sudo nano catalog.wsgi
+
+import sys
+sys.path.insert(0, “/var/www/catalog”)
+from catalog import app as application
+application.secret_key='f1ef9d3b-b3db-4c30-ab6d-cc99095a4fb5'
+
+## Changes in the python files from the base project
+
+Changes in the python files:
+The following changes were made in models.py
+The file on the repository init.py was renamed to __init__.py to make the catalog folder a python package.
+The follow changes were made inside
+
+Disable the default apache site and enable the catalog app:
+>sudo a2dissite 000-default.conf
+>sudo a2ensite catalog.conf
+>sudo service apache2 reload
+
+
+Reset the apache service:
+>sudo service apache2 restart
 
 
 
