@@ -3,6 +3,6 @@
 ## Set up an amazon lightsail instance
 
 
-![Test](/images/001_lightsail_create.jpg)
+![Test](udacity_fullstack_nano/server_configuration/images/001_lightsail_create.jpg)
 
 
