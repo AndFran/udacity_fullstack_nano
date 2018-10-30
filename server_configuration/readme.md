@@ -79,10 +79,15 @@ Click generate:
 
 When putty has finished generating the keys save them to a secure location on your hard disk on your local machine (both the private and public key).
 Now on the linux instance go to the grader’s home directory
+
 >cd /home/grader
+
 >sudo mkdir .ssh
+
 >cd .ssh
+
 >sudo nano authorized_keys
+
 Paste this key into the file and save.
 
 ## Configure putty to use this key:
@@ -272,6 +277,29 @@ Disable the default apache site and enable the catalog app:
 
 Reset the apache service:
 >sudo service apache2 restart
+
+## Get a domain name for the server
+
+The server as it stands just has an IP address:
+3.121.94.16
+
+Inside the light sail web interface click and get a static IP address under the networking tab.
+Now with this static IP use a DNS lookup to get a server name it will be something like:
+
+http://ec2-3-121-94-16.eu-central-1.compute.amazonaws.com/
+
+
+
+
+## Check the catalog app loads as the default application:
+
+Go to the http://ec2-3-121-94-16.eu-central-1.compute.amazonaws.com/
+
+
+
+
+
+
 
 
 
